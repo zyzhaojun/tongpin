@@ -1,0 +1,35 @@
+{
+  "name": "tongpin",
+  "version": "0.2.1",
+  "description": "Windows 局域网画面投屏",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zyzhaojun/tongpin.git"
+  },
+  "homepage": "https://github.com/zyzhaojun/tongpin",
+  "bugs": "https://github.com/zyzhaojun/tongpin/issues",
+  "main": "build/main.cjs",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "tsc --noEmit",
+    "start": "npm run build && electron .",
+    "test": "npm run build && node --test tests/signaling.test.cjs",
+    "test:app": "npm run build && node tests/app.test.cjs",
+    "package": "npm run check && npm run build && node scripts/package.mjs"
+  },
+  "dependencies": {
+    "selfsigned": "5.5.0",
+    "ws": "8.21.3"
+  },
+  "devDependencies": {
+    "@electron/packager": "20.3.0",
+    "@playwright/test": "1.63.0",
+    "@types/node": "26.5.1",
+    "@types/ws": "8.18.1",
+    "electron": "44.3.0",
+    "esbuild": "0.28.2",
+    "typescript": "7.0.2"
+  }
+}

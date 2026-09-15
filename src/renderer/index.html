@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self' blob:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>同屏</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="enhancements.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true"><i></i><i></i></span><strong>同屏</strong><span class="brand-caption">把画面，带到大屏。</span></div>
+    <span class="local-badge"><span class="dot"></span>局域网直连</span>
+  </header>
+  <main>
+    <section id="home" class="view">
+      <div class="hero"><p class="eyebrow">TONGPIN · 画面共享</p><h1>一台电脑，<br>连接另一块屏幕。</h1><p class="lead">在同一局域网，分享你的课件、桌面与演示。</p></div>
+      <div class="role-grid">
+        <button id="go-send" class="role-card"><span class="role-icon" aria-hidden="true">↗</span><span class="role-text"><strong>我要投屏</strong><span>在专家的笔记本上选择</span></span><span class="arrow" aria-hidden="true">→</span></button>
+        <button id="go-receive" class="role-card"><span class="role-icon receiver-icon" aria-hidden="true">▣</span><span class="role-text"><strong>接收投屏</strong><span>在一体机或大屏电脑上选择</span></span><span class="arrow" aria-hidden="true">→</span></button>
+      </div>
+      <div class="home-notes"><span>无需注册</span><span>无需互联网</span><span>画面同步</span></div>
+      <details class="help"><summary>第一次使用</summary><p>两台电脑连接可互通的局域网。先在大屏端选择“接收投屏”，再在笔记本的附近设备中选择大屏。</p><p>首次接收时按提示完成一次防火墙修复。电视连接 Windows 电脑时，还需在电视上选择对应的 HDMI 输入。</p></details>
+    </section>
+    <section id="send" class="view" hidden>
+      <div class="page-title"><div><p class="eyebrow">发送端</p><h1>让你的画面上屏</h1></div><button class="text-button back">返回首页</button></div>
+      <div id="connect-card" class="panel connect-card">
+        <div class="row between"><div><h2>附近的大屏</h2><p id="discovery-hint" class="hint">正在局域网中查找…</p></div><button id="refresh-devices" class="secondary">重新查找</button></div>
+        <div id="devices" class="device-list" role="group" aria-label="附近的接收设备"></div>
+        <div class="address-connect"><label for="receiver-address">没有找到？输入大屏上显示的 IP 地址</label><div class="row"><input id="receiver-address" inputmode="decimal" spellcheck="false" placeholder="192.168.1.128"><button id="connect-address" class="secondary">按 IP 连接</button></div></div>
+        <details class="manual-connect"><summary>备用：使用完整连接信息</summary><label for="invitation">大屏的连接信息</label><textarea id="invitation" rows="2" spellcheck="false" placeholder="tongpin://192.168.1.20:48765/…"></textarea><div class="row"><button id="connect" class="secondary">连接</button><button id="open-invite" class="secondary">打开连接文件</button></div></details>
+      </div>
+      <div id="source-panel" class="panel" hidden>
+        <div class="row between"><div><h2>选择分享内容</h2><p class="hint">演示 PPT 时，选择整个屏幕可以跟随放映画面。</p></div><button id="refresh-sources" class="secondary">刷新</button></div>
+        <div class="row source-controls"><label for="source-kind">显示</label><select id="source-kind"><option value="screen">整个屏幕</option><option value="window">应用窗口</option></select><label for="quality">画质</label><select id="quality"><option value="1080">清晰 · 1080p</option><option value="720">流畅 · 720p</option></select></div>
+        <div id="sources" class="source-grid" role="group" aria-label="可分享的内容"></div>
+        <div class="row"><button id="start-share" class="primary" disabled>开始投屏</button><button id="cancel-change" class="secondary" hidden>取消更换</button><button id="disconnect-send" class="secondary">断开连接</button></div>
+      </div>
+      <div id="sharing-panel" class="panel" hidden>
+        <div class="row between"><div><h2>正在分享画面</h2><p id="source-name" class="hint"></p></div><span class="live-label"><span class="dot"></span>投屏中</span></div>
+        <video id="local-video" autoplay muted playsinline></video>
+        <div class="row between share-footer"><p class="hint">停止画面后仍保持配对，可直接重新选择。</p><div class="row"><button id="change-source" class="secondary">更换画面</button><button id="stop-share" class="danger">停止画面</button></div></div>
+      </div>
+    </section>
+    <section id="receive" class="view" hidden>
+      <div class="page-title"><div><p class="eyebrow">接收端</p><h1 id="receive-title">准备接收画面</h1></div><div class="row"><button id="fullscreen" class="secondary">全屏 · F11</button><button id="stop-receive" class="text-button">结束接收</button></div></div>
+      <div id="waiting-panel" class="panel waiting-panel">
+        <div class="receiver-symbol" aria-hidden="true">▣</div><h2>已可被附近的电脑发现</h2><p id="receiver-name" class="hint"></p>
+        <div id="firewall-card" class="setup-alert" hidden><div><strong>需要配置 Windows 防火墙</strong><p>完成一次后，软件升级或移动文件夹也无需重复。</p></div><button id="repair-firewall" class="primary">一键修复</button></div>
+        <div id="pair-request" class="pair-request" hidden><p class="eyebrow">新的投屏请求</p><h3 id="pair-name"></h3><p id="pair-address" class="hint"></p><div class="row centered"><button id="allow-pair" class="primary">允许投屏</button><button id="reject-pair" class="secondary">拒绝</button></div></div>
+        <label class="auto-approve"><input id="auto-approve" type="checkbox"> 自动允许下一台电脑（仅本次）</label>
+        <div class="address-row"><label for="address">接收地址</label><select id="address"></select></div>
+        <p id="expiry" class="hint"></p>
+        <details class="manual-connect"><summary>备用连接信息</summary><textarea id="receiver-invite" rows="3" readonly aria-label="接收端连接信息"></textarea><div class="row centered"><button id="copy-invite" class="secondary">复制连接信息</button><button id="save-invite" class="secondary">保存连接文件</button></div></details>
+        <p class="small">默认需要在大屏上允许新设备。勾选自动允许后，同一局域网的下一台电脑可以直接连接。</p>
+      </div>
+      <div id="receive-stage" hidden><video id="remote-video" autoplay muted playsinline></video><div id="receive-overlay">正在建立画面连接…</div></div>
+    </section>
+    <div id="notice" role="alert" hidden></div>
+  </main>
+  <footer><div class="status"><span id="status-dot" class="dot"></span><span id="status-text" role="status">准备就绪</span></div><span id="stats"></span><span id="version">v0.2.1</span></footer>
+  <script src="app.js"></script>
+</body>
+</html>
