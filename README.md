@@ -1,27 +1,29 @@
-# 同屏 Tongpin
+# Tongpin
 
-Windows 局域网画面投屏。一个免安装程序，提供“我要投屏”和“接收投屏”两个入口。
+[English](README.md) | [简体中文](README.zh-CN.md)
 
-当前版本：0.2.1 预览版。画面共享；不采集声音或麦克风。无账号、订阅、授权检查、自动更新和运行时互联网依赖。
+Peer-to-peer screen sharing for Windows local area networks. Tongpin is a portable desktop app with two simple modes: share your screen and receive a shared screen.
 
-## 使用
+Current version: 0.2.1 preview. Tongpin shares video only and never captures system audio or a microphone. It requires no account, subscription, license check, automatic updater, or internet connection at runtime.
 
-从 [GitHub Releases](https://github.com/zyzhaojun/tongpin/releases/latest) 下载 `Tongpin-0.2.1-win-x64.zip`，在两台 Windows x64 电脑上分别完整解压，运行文件夹中的 `Tongpin.exe`。无需安装 Node.js。
+## Usage
 
-1. 大屏电脑选择“接收投屏”。第一次使用时点击“一键修复”，完成一次 Windows 管理员确认。
-2. 笔记本选择“我要投屏”，从附近设备中选择大屏；大屏点击“允许投屏”。也可直接输入大屏 IP。
-3. 选择整个屏幕或某个应用窗口，点击“开始投屏”。
-4. 接收端按 F11 全屏，按 Esc 退出全屏。
+Download `Tongpin-0.2.1-win-x64.zip` from [GitHub Releases](https://github.com/zyzhaojun/tongpin/releases/latest). Fully extract it on two Windows x64 computers, then run `Tongpin.exe` from each extracted folder. Node.js is not required.
 
-接收端可勾选“自动允许下一台电脑（仅本次）”，适合已经确认现场网络环境的讲座；该模式只跳过下一次大屏确认。完整连接信息和 `.tongpin` 文件仍作为故障备用。
+1. On the display computer, select **接收投屏** (Receive Screen). The first time, select **一键修复** (One-click Fix) and approve the Windows administrator prompt.
+2. On the laptop, select **我要投屏** (Share My Screen), choose the display from nearby devices, and approve the request on the display computer. You can also enter the display computer's IP address directly.
+3. Choose the entire screen or an application window, then select **开始投屏** (Start Sharing).
+4. On the receiver, press F11 to enter full screen and Esc to leave full screen.
 
-停止画面后仍保持配对，可以直接换窗口或重新开始；只有点击“断开连接”才需要重新获取连接信息。画质切换和画面源切换也不会重新配对。
+The receiver can enable **自动允许下一台电脑（仅本次）** (Automatically allow the next computer, this session only) after confirming that the local network is trusted. This skips the approval prompt for only the next connection. The full invitation text and `.tongpin` file remain available as fallback options.
 
-详见 [使用说明](docs/使用说明.md)、[开发方案](docs/开发方案.md) 和 [验证记录](docs/验证记录.md)。
+Stopping the video keeps the devices paired, so you can switch windows or start sharing again without reconnecting. Only **断开连接** (Disconnect) clears the pairing. Changing the quality or source also keeps the current pairing.
 
-## 本地开发
+Detailed Chinese documentation is available in the [user guide](docs/使用说明.md), [development plan](docs/开发方案.md), and [validation record](docs/验证记录.md).
 
-使用 Node.js 24 LTS 或满足依赖要求的更高版本。安装依赖和首次下载 Electron 需要互联网；运行分发包无需互联网。
+## Local development
+
+Use Node.js 24 LTS or a newer compatible version. Installing dependencies and downloading Electron for the first time requires internet access; running the packaged app does not.
 
 ```powershell
 npm ci
@@ -32,28 +34,28 @@ npm start
 npm run package
 ```
 
-`test:app` 会临时打开两个应用实例和一个专用测试窗口，实际采集该测试窗口。测试结束自动关闭这些实例。测试结果和截图写入 `test-results/`。
+`test:app` temporarily opens two app instances and a dedicated test window, then captures that test window. The test closes the instances automatically and writes its results and screenshots to `test-results/`.
 
-## 架构
+## Architecture
 
-- Electron / TypeScript：本地界面和屏幕采集；沙箱 preload 提供有限接口。
-- 接收端内置 HTTPS/WSS 服务，默认 TCP 48765；发送端并行探测本机 IPv4 地址所在的 `/24` 网段，不依赖容易被校园网过滤的 mDNS 或组播。
-- 发现接口只返回设备名称；发送端从 TLS 证书取得指纹，连接请求仍需大屏允许。不会把连接密钥广播到局域网。
-- Windows 防火墙助手创建固定的 TCP 48765 入站规则，只允许 `LocalSubnet`。规则与 exe 路径无关，因此移动绿色软件或升级后仍有效。
-- 备用连接信息包含接收端 IPv4 地址、端口、SHA-256 证书指纹与 128 位随机令牌。客户端验证指纹后才发送令牌；不依赖公共证书服务。
-- 待连接信息每 10 分钟自动更新；主动断开或自动恢复超时后更换。同一时刻只接受一个发送者。
-- WebRTC 只配置本地候选地址，`iceServers: []`；只发送视频轨道，接收端也拒绝音频 SDP。
-- 视频优先保持文字分辨率，提供 1080p/720p 两档目标和最高 30fps；实际值取决于屏幕、编码器和网络。
-- WebSocket 心跳检测断线，并使用独立的 256 位恢复凭据保留原设备 60 秒；恢复期间拒绝其他发送者。媒体连接中断等待 15 秒，失败后只重建画面连接，配对信令继续运行。
+- Electron and TypeScript provide the local interface and screen capture. A sandboxed preload script exposes a limited API.
+- The receiver hosts an HTTPS/WSS service on TCP port 48765 by default. The sender probes the `/24` network for each local IPv4 address in parallel, without relying on mDNS or multicast that campus networks may filter.
+- Discovery returns only the device name. The sender obtains the TLS certificate fingerprint directly, and the receiver must still approve the connection. Connection secrets are never broadcast on the LAN.
+- The Windows Firewall helper creates a fixed inbound rule for TCP port 48765 restricted to `LocalSubnet`. The rule is independent of the executable path, so moving or upgrading the portable app does not invalidate it.
+- The fallback invitation contains the receiver's IPv4 addresses, port, SHA-256 certificate fingerprint, and a random 128-bit token. The client verifies the fingerprint before sending the token and does not depend on a public certificate service.
+- Pending invitations rotate every 10 minutes and after a manual disconnect or recovery timeout. The receiver accepts only one sender at a time.
+- WebRTC uses local candidates only with `iceServers: []`. The sender publishes only a video track, and the receiver rejects audio SDP.
+- Video prioritizes readable text and offers 1080p and 720p targets at up to 30 fps. Actual performance depends on the display, encoder, and network.
+- WebSocket heartbeats detect connection loss. A separate 256-bit recovery credential reserves the session for the original device for 60 seconds. Media failures wait 15 seconds before rebuilding only the media connection while keeping the pairing channel alive.
 
-## 首版边界
+## Current limitations
 
-- 支持 Windows x64，已执行的系统与测试范围见验证记录。
-- 自动查找覆盖发送电脑每个 IPv4 地址所在的 `/24` 网段；跨网段时输入大屏 IP，网络仍需允许终端互访。
-- 窗口最小化时可能暂停采集，PPT 放映建议分享整个屏幕。
-- 同一 Wi-Fi 名称并不保证终端互通，访客网络/校园网隔离可能阻止连接。
-- 测试机上的成功不等于已通过其他电脑或实际校园 Wi-Fi 的验收。
+- Windows x64 is supported. See the validation record for the tested systems and scenarios.
+- Automatic discovery scans the `/24` network for every IPv4 address on the sender. For devices on another subnet, enter the receiver's IP address manually; the network must still permit direct communication.
+- Capturing an application window may pause when that window is minimized. For PowerPoint presentations, sharing the entire screen is recommended.
+- Devices connected to the same Wi-Fi name are not necessarily allowed to communicate. Guest or campus network isolation can block the connection.
+- Success on the tested devices does not guarantee compatibility with every computer or campus Wi-Fi environment.
 
-## 许可
+## License
 
-项目源码采用 MIT 许可。Electron、Chromium 及其他依赖各自的许可文件随依赖或分发包保留。
+The source code is licensed under the MIT License. Electron, Chromium, and other dependencies retain their respective licenses, included with the dependencies or packaged distribution.
